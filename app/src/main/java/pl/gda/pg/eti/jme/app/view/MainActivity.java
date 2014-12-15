@@ -1,5 +1,7 @@
 package pl.gda.pg.eti.jme.app.view;
 
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -7,6 +9,7 @@ import android.support.v7.app.ActionBarActivity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.Toast;
 
@@ -29,7 +32,7 @@ import pl.gda.pg.eti.jme.app.R;
 import pl.gda.pg.eti.jme.app.business.ProductsController;
 import pl.gda.pg.eti.jme.app.model.Product;
 import pl.gda.pg.eti.jme.app.model.dummy.DummyModel;
-import pl.gda.pg.eti.jme.app.view.adapters.ListItemAdapter;
+import pl.gda.pg.eti.jme.app.view.adapters.ProductListItemAdapter;
 
 public class MainActivity extends ActionBarActivity {
 
@@ -37,76 +40,32 @@ public class MainActivity extends ActionBarActivity {
     public static final String SERVER_URL = "http://10.0.2.2:5000";
     public static final String PRODUCTS_URL = SERVER_URL + "/products";
     public static final String USER_ID_URL = SERVER_URL + "/user";
+    public static final String LISTS_URL = SERVER_URL + "/lists";
+    public static final String DEFAULT_LIST_NAME = "Default list";
 
     private int userId;
     private int deviceId;
+    private String listName;
 
     ListView listView;
     ProductsController productsController;
-
-   /* @Override
-    public void onSaveInstanceState(Bundle outState) {
-        super.onSaveInstanceState(outState);
-        int size = productsController.getProducts().size();
-        int[] ids = new int[size];
-        String[] names = new String[size];
-        int[] amounts = new int[size];
-        int[] localAmounts = new int[size];
-
-        int i = 0;
-        for (Product product : productsController.getProducts()) {
-            ids[i] = product.getId();
-            names[i] = product.getName();
-            amounts[i] = product.getAmount();
-            localAmounts[i] = product.getLocalAmount();
-            i++;
-        }
-
-        outState.putIntArray("ids", ids);
-        outState.putStringArray("names", names);
-        outState.putIntArray("amounts", amounts);
-        outState.putIntArray("localAmounts", localAmounts);
-    }*/
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        listView = (ListView) findViewById(R.id.list_view);
+        listView = (ListView) findViewById(R.id.product_list_view);
 
         Intent intent = getIntent();
         userId = intent.getIntExtra(LoginActivity.USER_ID_MESSAGE, 1);
         deviceId = intent.getIntExtra(LoginActivity.DEVICE_ID_MESSAGE, 1);
+        listName = intent.getStringExtra(LoginActivity.LIST_NAME_MESSAGE);
 
         productsController = new ProductsController();
 
-        /*if (savedInstanceState != null) {
-            productsController.getProducts().clear();
-            int[] ids = savedInstanceState.getIntArray("ids");
-            String[] names = savedInstanceState.getStringArray("names");
-            int[] amounts = savedInstanceState.getIntArray("amounts");
-            int[] localAmounts = savedInstanceState.getIntArray("localAmounts");
-            for (int i=0; i != ids.length; i++) {
-                //FIXME: user ID
-                int id = 0;
-                String name = "";
-                int amount = 0;
-                int localAmount = 0;
-                if (ids != null)
-                    id = ids[i];
-                if (names != null)
-                    name = names[i];
-                if (amounts != null)
-                    amount = amounts[i];
-                if (localAmounts != null)
-                    localAmount = localAmounts[i];
-
-                productsController.getProducts().add(new Product(id, name, amount, localAmount));
-            }
-        }*/
-
-
         updateListView();
+
+        Toast.makeText(getApplicationContext(), listName, Toast.LENGTH_SHORT).show();
     }
 
     @Override
@@ -147,8 +106,13 @@ public class MainActivity extends ActionBarActivity {
     }
 
     private String getFileDir() {
-        return getApplicationContext().getFilesDir().getPath() + "/"
+        String dir = getApplicationContext().getFilesDir().getPath() + "/"
                 + FILE_NAME + String.valueOf(userId) + "_" + String.valueOf(deviceId);
+
+        if (!listName.equals(DEFAULT_LIST_NAME))
+            dir += "_" + listName;
+
+        return dir;
     }
 
     @Override
@@ -190,7 +154,6 @@ public class MainActivity extends ActionBarActivity {
         productsController.setProducts(products);
         productsController.addProductsThatShouldBeAdded();
         updateListView();
-
     }
 
 
@@ -232,9 +195,62 @@ public class MainActivity extends ActionBarActivity {
         }
     }
 
+    private void EditProductShopDialog(final Product product) {
+        AlertDialog.Builder alert = new AlertDialog.Builder(this);
+
+        alert.setTitle("Shop for product");
+        alert.setMessage("Name:");
+
+        final EditText input = new EditText(this);
+        alert.setView(input);
+
+        alert.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int whichButton) {
+                String value = input.getText().toString();
+                product.setShop(value);
+                product.setShopModified(true);
+                updateListView();
+            }
+        });
+
+        alert.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int whichButton) {
+            }
+        });
+
+        alert.show();
+    }
+
+    private void EditProductPriceDialog(final Product product) {
+        AlertDialog.Builder alert = new AlertDialog.Builder(this);
+
+        alert.setTitle("Price for product");
+        alert.setMessage("Price:");
+
+        final EditText input = new EditText(this);
+        alert.setView(input);
+
+        alert.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int whichButton) {
+                String value = input.getText().toString();
+                float val = Float.parseFloat(value);
+                product.setPrice(val);
+                product.setPriceModified(true);
+                updateListView();
+            }
+        });
+
+        alert.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int whichButton) {
+            }
+        });
+
+        alert.show();
+    }
+
     private void updateListView() {
-        ListItemAdapter adapter = new ListItemAdapter(
-                getApplicationContext(), R.layout.list_item, productsController.getProducts()) {
+        ProductListItemAdapter adapter = new ProductListItemAdapter(
+                getApplicationContext(), R.layout.product_list_item, productsController.getProducts()) {
 
             @Override
             public void onModifyAmountClick(View view, Product product, int amount) {
@@ -247,9 +263,20 @@ public class MainActivity extends ActionBarActivity {
                 updateListView();
                 Toast.makeText(getApplicationContext(), "delete  " + product.getName(), Toast.LENGTH_SHORT).show();
             }
+
+            @Override
+            public void onModifyProductShop(Product product) {
+                EditProductShopDialog(product);
+            }
+
+            @Override
+            public void onModifyProductPrice(Product product) {
+                EditProductPriceDialog(product);
+            }
         };
         listView.setAdapter(adapter);
     }
+
 
     public void addAmount(Product product, int amount) {
         String text = product.getName() + " -->  " + String.valueOf(amount);
@@ -268,7 +295,7 @@ public class MainActivity extends ActionBarActivity {
         if (requestCode == 1) {
             if(resultCode == RESULT_OK){
                 String newProductName = data.getStringExtra("result");
-                Product newProduct = new Product(newProductName, 0, 0);
+                Product newProduct = new Product(newProductName, 0, 0, "Some shop", 0.0f, listName);
                 productsController.addProductToBeAdded(newProduct);
                 updateListView();
             }
@@ -293,6 +320,7 @@ public class MainActivity extends ActionBarActivity {
             SimpleHttpHandler shh = new SimpleHttpHandler(PRODUCTS_URL);
             shh.addParam("user_id", String.valueOf(userId));
             shh.addParam("device_id", String.valueOf(deviceId));
+            shh.addParam("list_name", listName);
             JSONArray products = new JSONArray();
             for (Product p : productsController.getProducts()) {
                 products.put(new Gson().toJson(p));
@@ -327,9 +355,12 @@ public class MainActivity extends ActionBarActivity {
                     String name = c.getString("name");
                     int amount = c.getInt("amount");
                     int localAmount = productsController.getLocalAmountByName(name);
+                    String shop = c.getString("shop");
+                    float price = (float)c.getDouble("price");
+                    String list = c.getString("list");
 
                     //FIXME: user id
-                    Product product = new Product(name, amount, localAmount);
+                    Product product = new Product(name, amount, localAmount, shop, price, list);
 
                     products.add(product);
                 }

@@ -8,7 +8,6 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.ImageView;
 import android.widget.TextView;
 
 import java.util.List;
@@ -16,11 +15,11 @@ import java.util.List;
 import pl.gda.pg.eti.jme.app.R;
 import pl.gda.pg.eti.jme.app.model.Product;
 
-public abstract class ListItemAdapter extends ArrayAdapter<Product> {
+public abstract class ProductListItemAdapter extends ArrayAdapter<Product> {
     private LayoutInflater mInflater;
     List<Product> products;
 
-    public ListItemAdapter(Context context, int resource, List<Product> objects) {
+    public ProductListItemAdapter(Context context, int resource, List<Product> objects) {
         super(context, resource, objects);
         mInflater = (LayoutInflater)context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         this.products = objects;
@@ -31,21 +30,39 @@ public abstract class ListItemAdapter extends ArrayAdapter<Product> {
         View view = convertView;
 
         if (view == null) {
-            view = mInflater.inflate(R.layout.list_item, parent, false);
+            view = mInflater.inflate(R.layout.product_list_item, parent, false);
         }
 
         TextView productName = (TextView) view.findViewById(R.id.product_name);
         TextView productAmount = (TextView) view.findViewById(R.id.product_amount);
         TextView productLocalAmount = (TextView) view.findViewById(R.id.product_localamount);
+        TextView productShop = (TextView) view.findViewById(R.id.product_shop);
+        TextView productPrice = (TextView) view.findViewById(R.id.product_price);
 
         final Product product = products.get(position);
         productName.setText(product.getName());
         productAmount.setText(String.valueOf(product.getAmount()));
         productLocalAmount.setText(String.valueOf(product.getLocalAmount()));
+        productShop.setText(product.getShop());
+        productPrice.setText(String.valueOf(product.getPrice()));
 
         final EditText editText = (EditText) view.findViewById(R.id.modify_amount);
 
+        productShop.setOnLongClickListener(new View.OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View view) {
+                onModifyProductShop(product);
+                return true;
+            }
+        });
 
+        productPrice.setOnLongClickListener(new View.OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View view) {
+                onModifyProductPrice(product);
+                return true;
+            }
+        });
 
         Button addButton = (Button) view.findViewById(R.id.add_button);
         addButton.setOnClickListener(new View.OnClickListener() {
@@ -53,7 +70,7 @@ public abstract class ListItemAdapter extends ArrayAdapter<Product> {
             public void onClick(View view) {
                 final int amount = GetModifyAmount(editText);
                 if (amount > 0) {
-                    ListItemAdapter.this.onModifyAmountClick(view, product, amount);
+                    ProductListItemAdapter.this.onModifyAmountClick(view, product, amount);
                 }
             }
         });
@@ -64,7 +81,7 @@ public abstract class ListItemAdapter extends ArrayAdapter<Product> {
             public void onClick(View view) {
                 final int amount = GetModifyAmount(editText);
                 if (amount > 0) {
-                    ListItemAdapter.this.onModifyAmountClick(view, product, -amount);
+                    ProductListItemAdapter.this.onModifyAmountClick(view, product, -amount);
                 }
             }
         });
@@ -73,7 +90,7 @@ public abstract class ListItemAdapter extends ArrayAdapter<Product> {
         deleteProductButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                ListItemAdapter.this.onDeleteClick(view, product);
+                ProductListItemAdapter.this.onDeleteClick(view, product);
             }
         });
 
@@ -86,11 +103,13 @@ public abstract class ListItemAdapter extends ArrayAdapter<Product> {
         try {
             probAmount = Integer.parseInt(amountString);
         } catch (NumberFormatException nfe) {
-            Log.e("ListItemAdapter - Int parsing", nfe.toString());
+            Log.e("ProductListItemAdapter - Int parsing", nfe.toString());
         }
         return probAmount;
     }
 
     abstract public void onModifyAmountClick(View view, Product product, int amount);
     abstract public void onDeleteClick(View view, Product product);
+    abstract public void onModifyProductShop(Product product);
+    abstract public void onModifyProductPrice(Product product);
 }

@@ -14,5 +14,6 @@
     <string name="title_activity_login">LoginActivity</string>
     <string name="title_activity_add_product">AddProductActivity</string>
     <string name="hello_world">Hello world!</string>
+    <string name="title_activity_list">ListActivity</string>
 
 </resources>

@@ -24,7 +24,11 @@
         </activity>
         <activity
             android:name="pl.gda.pg.eti.jme.app.view.AddProductActivity"
-            android:label="@string/title_activity_add_product"/>
+            android:label="@string/title_activity_add_product" />
+        <activity
+            android:name="pl.gda.pg.eti.jme.app.view.ListActivity"
+            android:label="@string/title_activity_list" >
+        </activity>
     </application>
 
 </manifest>

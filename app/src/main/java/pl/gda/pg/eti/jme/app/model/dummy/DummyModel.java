@@ -9,9 +9,7 @@ public class DummyModel {
     public static List<Product> getProducts() {
         ArrayList<Product> products = new ArrayList<Product>();
 
-        products.add(new Product("bread", 5, 0));
-        products.add(new Product("fish", 2, 0));
-        products.add(new Product("wine bottle", 10, 0));
+        products.add(new Product("bread", 5, 0, "Aldi", 10.99f, "moja lista"));
 
         return products;
     }

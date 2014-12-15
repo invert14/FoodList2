@@ -21,6 +21,7 @@ public class LoginActivity extends ActionBarActivity {
 
     public final static String USER_ID_MESSAGE = "pl.gda.pg.eti.jme.app.USER_ID_MESSAGE";
     public final static String DEVICE_ID_MESSAGE = "pl.gda.pg.eti.jme.app.DEVICE_ID_MESSAGE";
+    public final static String LIST_NAME_MESSAGE = "pl.gda.pg.eti.jme.app.LIST_NAME_MESSAGE";
 
     private EditText loginEditText;
     private EditText passwordEditText;
@@ -92,19 +93,19 @@ public class LoginActivity extends ActionBarActivity {
         @Override
         protected void onPostExecute(Integer id) {
             if (id != 0)
-                startMainActivityLogged(id);
+                startListActivityLogged(id);
             else {
                 id = LoginHelper.getUserId(login, password);
                 if (id != 0)
-                    startMainActivityLogged(id);
+                    startListActivityLogged(id);
                 else
                     Toast.makeText(getApplicationContext(), "Wrong credentials!", Toast.LENGTH_SHORT).show();
             }
         }
     }
 
-    private void startMainActivityLogged(Integer id) {
-        Intent intent = new Intent(this.getBaseContext(), MainActivity.class);
+    private void startListActivityLogged(Integer id) {
+        Intent intent = new Intent(this.getBaseContext(), ListActivity.class);
         intent.putExtra(USER_ID_MESSAGE, id);
         intent.putExtra(DEVICE_ID_MESSAGE, deviceId);
         startActivity(intent);

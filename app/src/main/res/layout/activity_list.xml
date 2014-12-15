@@ -7,21 +7,20 @@
     android:paddingTop="@dimen/activity_vertical_margin"
     android:paddingBottom="@dimen/activity_vertical_margin"
     android:orientation="vertical"
-    tools:context=".MainActivity$PlaceholderFragment">
+    tools:context="pl.gda.pg.eti.jme.app.view.ListActivity$PlaceholderFragment">
 
     <ListView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:id="@+id/product_list_view"
+        android:id="@+id/list_list_view"
         />
 
     <Button
-        android:id="@+id/button_newProduct"
+        android:id="@+id/button_newList"
         android:layout_width="match_parent"
         android:layout_height="40dp"
-        android:text="Add product"
-        android:onClick="addProduct"
+        android:text="Add list"
+        android:onClick="addList"
         />
-
 
 </LinearLayout>
