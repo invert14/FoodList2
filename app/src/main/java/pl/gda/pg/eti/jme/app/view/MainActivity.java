@@ -27,6 +27,7 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 
+import pl.gda.pg.eti.jme.app.business.AllProductsContainer;
 import pl.gda.pg.eti.jme.app.helpers.SimpleHttpHandler;
 import pl.gda.pg.eti.jme.app.R;
 import pl.gda.pg.eti.jme.app.business.ProductsController;
@@ -49,6 +50,7 @@ public class MainActivity extends ActionBarActivity {
 
     ListView listView;
     ProductsController productsController;
+    AllProductsContainer allProducts;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -61,11 +63,17 @@ public class MainActivity extends ActionBarActivity {
         deviceId = intent.getIntExtra(LoginActivity.DEVICE_ID_MESSAGE, 1);
         listName = intent.getStringExtra(LoginActivity.LIST_NAME_MESSAGE);
 
-        productsController = new ProductsController();
+        allProducts = new AllProductsContainer(getAllProductsFileDir());
+        productsController = new ProductsController(allProducts);
 
         updateListView();
 
         Toast.makeText(getApplicationContext(), listName, Toast.LENGTH_SHORT).show();
+    }
+
+    private String getAllProductsFileDir() {
+        return getApplicationContext().getFilesDir().getPath() + "/"
+                + FILE_NAME + String.valueOf(userId) + "_" + String.valueOf(deviceId) + "_all";
     }
 
     @Override
@@ -295,9 +303,15 @@ public class MainActivity extends ActionBarActivity {
         if (requestCode == 1) {
             if(resultCode == RESULT_OK){
                 String newProductName = data.getStringExtra("result");
-                Product newProduct = new Product(newProductName, 0, 0, "Some shop", 0.0f, listName);
-                productsController.addProductToBeAdded(newProduct);
-                updateListView();
+                if (!allProducts.containsProduct(newProductName)) {
+                    Product newProduct = new Product(newProductName, 0, 0, "Some shop", 0.0f, listName);
+                    newProduct.setShopModified(true);
+                    newProduct.setPriceModified(true);
+                    productsController.addProductToBeAdded(newProduct);
+                    updateListView();
+                } else {
+                    Toast.makeText(getApplicationContext(), "Product already exists!", Toast.LENGTH_SHORT).show();
+                }
             }
             if (resultCode == RESULT_CANCELED) {
                 //Write your code if there's no result
@@ -363,6 +377,7 @@ public class MainActivity extends ActionBarActivity {
                     Product product = new Product(name, amount, localAmount, shop, price, list);
 
                     products.add(product);
+                    allProducts.addProduct(name);
                 }
                 productsController.clearAndAddProducts(products);
                 updateListView();

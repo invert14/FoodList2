@@ -16,7 +16,10 @@ public class ProductsController {
     private List<Product> productsToBeAdded;
     private List<Product> productsToBeDeleted;
 
-    public ProductsController() {
+    private AllProductsContainer allProducts;
+
+    public ProductsController(AllProductsContainer allProducts) {
+        this.allProducts = allProducts;
         products = new ArrayList<Product>();
         productsToBeAdded = new ArrayList<Product>();
         productsToBeDeleted = new ArrayList<Product>();
@@ -37,10 +40,12 @@ public class ProductsController {
 
     public void addProduct(Product product) {
         products.add(product);
+        allProducts.addProduct(product.getName());
     }
 
     public void clearAndAddProducts(List<Product> products) {
         this.products.clear();
+        allProducts.clear();
         for (Product p : products) {
             addProduct(p);
         }
@@ -63,6 +68,7 @@ public class ProductsController {
 
     public void clear() {
         products.clear();
+        allProducts.clear();
     }
 
     public Product getProductByName(String name) {
@@ -89,7 +95,7 @@ public class ProductsController {
         if (products.contains(p)) {
             products.remove(p);
             productsToBeDeleted.add(p);
-
+            allProducts.removeProduct(name);
         }
     }
 

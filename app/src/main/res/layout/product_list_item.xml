@@ -76,7 +76,6 @@
             android:id="@+id/modify_amount"
             android:background="@drawable/abc_ab_bottom_solid_light_holo"
             android:textColor="#ff2d1032"
-            android:inputType="number"
         />
 
         <Button
